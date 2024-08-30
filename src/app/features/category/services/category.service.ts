@@ -1,0 +1,25 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { AddCategoryRequest } from '../models/add-category-request.model';
+import { Observable } from 'rxjs';
+import { Category } from '../models/category.model';
+import { environment } from '../../../../environments/environment';
+
+
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CategoryService {
+
+  constructor(private http: HttpClient) { }
+
+  getAllCategories(): Observable<Category[]> {
+    return this.http.get<Category[]>(`${environment.apiBaseUrl}/api/categories`)
+  }
+
+  addCategory(model: AddCategoryRequest): Observable<void> {
+    return this.http.post<void>(`${environment.apiBaseUrl}/api/categories`, model);
+  }
+
+}
