@@ -4,6 +4,7 @@ import { AddCategoryRequest } from '../models/add-category-request.model';
 import { Observable } from 'rxjs';
 import { Category } from '../models/category.model';
 import { environment } from '../../../../environments/environment';
+import { UpdateCategoryRequest } from '../models/update-category-request.model';
 
 
 
@@ -18,8 +19,16 @@ export class CategoryService {
     return this.http.get<Category[]>(`${environment.apiBaseUrl}/api/categories`)
   }
 
+  getCategoryById(id: string): Observable<Category> {
+    return this.http.get<Category>(`${environment.apiBaseUrl}/api/categories/${id}`)
+  }
+
   addCategory(model: AddCategoryRequest): Observable<void> {
     return this.http.post<void>(`${environment.apiBaseUrl}/api/categories`, model);
+  }
+
+  updateCategory(id: string, updateCategoryRequest: UpdateCategoryRequest) : Observable<Category> {
+    return this.http.put<Category>(`${environment.apiBaseUrl}/api/categories/${id}`, updateCategoryRequest);
   }
 
 }
