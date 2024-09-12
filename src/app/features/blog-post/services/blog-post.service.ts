@@ -12,11 +12,15 @@ export class BlogPostService {
 
   constructor(private http: HttpClient) { }
 
-getAllBlogPosts(): Observable<BlogPost[]> {
-  return this.http.get<BlogPost[]>(`${environment.apiBaseUrl}/api/blogposts`)
-}
+  getAllBlogPosts(): Observable<BlogPost[]> {
+    return this.http.get<BlogPost[]>(`${environment.apiBaseUrl}/api/blogposts`)
+  }
 
-  createBlogPost(data: AddBlogPost) : Observable<BlogPost> {
+  getBlogPostById(id: string): Observable<BlogPost> {
+    return this.http.get<BlogPost>(`${environment.apiBaseUrl}/api/blogposts/${id}`);
+  }
+
+  createBlogPost(data: AddBlogPost): Observable<BlogPost> {
     return this.http.post<BlogPost>(`${environment.apiBaseUrl}/api/blogposts`, data)
   }
 }
