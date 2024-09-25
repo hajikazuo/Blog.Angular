@@ -9,11 +9,13 @@ import { MarkdownModule } from 'ngx-markdown';
 import { CategoryService } from '../../category/services/category.service';
 import { Category } from '../../category/models/category.model';
 import { UpdateBlogPost } from '../models/update-blog-post.model';
+import { ImageSelectorComponent } from "../../../shared/components/image-selector/image-selector.component";
+import { ImageService } from '../../../shared/components/image-selector/image.service';
 
 @Component({
   selector: 'app-edit-blogpost',
   standalone: true,
-  imports: [FormsModule, CommonModule, MarkdownModule],
+  imports: [FormsModule, CommonModule, MarkdownModule, ImageSelectorComponent],
   templateUrl: './edit-blogpost.component.html',
   styleUrl: './edit-blogpost.component.css'
 })
@@ -23,16 +25,19 @@ export class EditBlogpostComponent implements OnInit, OnDestroy {
   model?: BlogPost;
   categories$?: Observable<Category[]>;
   selectedCategories?: string[];
+  isImageSelectorVisible: boolean = false;
 
   routerSubscription?: Subscription;
   updateBlogPostSubscription?: Subscription;
   getBlogPostSubscription?: Subscription;
   deleteBlogPostSubscription?: Subscription;
+  imageSelectSubscription?: Subscription;
 
   constructor(private route: ActivatedRoute,
     private blogPostService: BlogPostService,
     private categoryService: CategoryService,
-    private router: Router) {
+    private router: Router,
+    private imageService: ImageService) {
 
   }
 
@@ -51,6 +56,16 @@ export class EditBlogpostComponent implements OnInit, OnDestroy {
             }
           });
         }
+
+        this.imageService.onSelectImage()
+        .subscribe({
+          next: (response) => {
+            if (this.model){
+              this.model.featuredImageUrl = response.url;
+              this.isImageSelectorVisible = false;
+            }
+          }
+        })
       }
     });
   }
@@ -69,24 +84,32 @@ export class EditBlogpostComponent implements OnInit, OnDestroy {
         categories: this.selectedCategories ?? []
       };
 
-      this.updateBlogPostSubscription = this.blogPostService.updateBlogPost(this.id, updateBlogPost)
+      this.imageSelectSubscription = this.updateBlogPostSubscription = this.blogPostService.updateBlogPost(this.id, updateBlogPost)
         .subscribe({
           next: (response) => {
-           this.router.navigateByUrl('/admin/blogposts');
+            this.router.navigateByUrl('/admin/blogposts');
           }
         });
     }
   }
 
   onDelete(): void {
-    if (this.id){
+    if (this.id) {
       this.deleteBlogPostSubscription = this.blogPostService.deleteBlogPost(this.id)
-      .subscribe({
-        next: (response) => {
-          this.router.navigateByUrl('/admin/blogposts');
-        }
-      })
+        .subscribe({
+          next: (response) => {
+            this.router.navigateByUrl('/admin/blogposts');
+          }
+        })
     }
+  }
+
+  openImageSelector(): void {
+    this.isImageSelectorVisible = true;
+  }
+
+  closeImageSelector(): void {
+    this.isImageSelectorVisible = false;
   }
 
   ngOnDestroy(): void {
@@ -94,6 +117,7 @@ export class EditBlogpostComponent implements OnInit, OnDestroy {
     this.updateBlogPostSubscription?.unsubscribe();
     this.getBlogPostSubscription?.unsubscribe();
     this.deleteBlogPostSubscription?.unsubscribe();
+    this.imageSelectSubscription?.unsubscribe();
   }
 
 }
