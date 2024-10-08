@@ -15,11 +15,80 @@ import { BlogPost } from '../models/blog-post.model';
 export class BlogpostListComponent implements OnInit {
 
   blogPosts$?: Observable<BlogPost[]>;
+  totalCount?: number;
+  list: number[] = [];
+  pageNumber = 1;
+  pageSize = 5;
+
   constructor(private blogPostService: BlogPostService) {
 
   }
   ngOnInit(): void {
-    this.blogPosts$ = this.blogPostService.getAllBlogPosts();
+    this.blogPostService.getBlogPostCount()
+      .subscribe({
+        next: (value) => {
+          this.totalCount = value;
+          this.list = new Array(Math.ceil(value / this.pageSize))
+
+          this.blogPosts$ = this.blogPostService.getAllBlogPosts(
+            undefined,
+            undefined,
+            undefined,
+            this.pageNumber,
+            this.pageSize
+          );
+        }
+      })
+  }
+
+  onSearch(query: string) {
+    this.blogPosts$ = this.blogPostService.getAllBlogPosts(query);
+  }
+
+  sort(sortBy: string, sortDirection: string) {
+    this.blogPosts$ = this.blogPostService.getAllBlogPosts(undefined, sortBy, sortDirection);
+  }
+
+  getPage(pageNumber: number) {
+    this.pageNumber = pageNumber;
+
+    this.blogPosts$ = this.blogPostService.getAllBlogPosts(
+      undefined,
+      undefined,
+      undefined,
+      this.pageNumber,
+      this.pageSize
+    );
+  }
+
+  getPrevPage() {
+    if (this.pageNumber - 1 < 1) {
+      return;
+    }
+
+    this.pageNumber -= 1;
+    this.blogPosts$ = this.blogPostService.getAllBlogPosts(
+      undefined,
+      undefined,
+      undefined,
+      this.pageNumber,
+      this.pageSize
+    );
+  }
+
+  getNextPage() {
+    if (this.pageNumber + 1 > this.list.length) {
+      return;
+    }
+
+    this.pageNumber += 1;
+    this.blogPosts$ = this.blogPostService.getAllBlogPosts(
+      undefined,
+      undefined,
+      undefined,
+      this.pageNumber,
+      this.pageSize
+    );
   }
 
 }

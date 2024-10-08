@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { AddCategoryRequest } from '../models/add-category-request.model';
 import { Observable } from 'rxjs';
 import { Category } from '../models/category.model';
@@ -16,12 +16,40 @@ export class CategoryService {
 
   constructor(private http: HttpClient, private cookieService: CookieService) { }
 
-  getAllCategories(): Observable<Category[]> {
-    return this.http.get<Category[]>(`${environment.apiBaseUrl}/api/categories`)
+  getAllCategories(query?: string, sortBy?: string, sortDirection?: string, pageNumber?: number, pageSize?: number): Observable<Category[]> {
+    let params = new HttpParams();
+
+    if (query) {
+      params = params.set('query', query)
+    }
+
+    if(sortBy) {
+      params = params.set('sortBy', sortBy)
+    }
+
+    if(sortDirection) {
+      params = params.set('sortDirection', sortDirection)
+    }
+
+    if(pageNumber) {
+      params = params.set('pageNumber', pageNumber)
+    }
+
+    if(pageSize) {
+      params = params.set('pageSize', pageSize)
+    }
+
+    return this.http.get<Category[]>(`${environment.apiBaseUrl}/api/categories`, {
+      params: params
+    });
   }
 
   getCategoryById(id: string): Observable<Category> {
-    return this.http.get<Category>(`${environment.apiBaseUrl}/api/categories/${id}`)
+    return this.http.get<Category>(`${environment.apiBaseUrl}/api/categories/${id}`);
+  }
+
+  getCategoryCount(): Observable<number> {
+    return this.http.get<number>(`${environment.apiBaseUrl}/api/categories/count`);
   }
 
   addCategory(model: AddCategoryRequest): Observable<void> {
